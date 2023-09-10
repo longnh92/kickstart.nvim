@@ -218,7 +218,11 @@ require('lazy').setup({
 -- NOTE: You can change these options as you wish!
 
 -- Set highlight on search
-vim.o.hlsearch = false
+vim.o.hlsearch = true
+vim.keymap.set('n', '<leader><cr>', '<esc>:noh<cr>', { desc = 'Clear highlight', silent = true })
+
+-- Set relative number bar
+vim.o.relativenumber = true
 
 -- Make line numbers default
 vim.wo.number = true
@@ -313,10 +317,10 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
+  ensure_installed = { 'ruby', 'javascript', 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-  auto_install = false,
+  auto_install = true,
 
   highlight = { enable = true },
   indent = { enable = true },
@@ -442,6 +446,7 @@ local servers = {
   -- tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
 
+  solargraph = {},
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -522,6 +527,8 @@ cmp.setup {
     { name = 'luasnip' },
   },
 }
+
+require'lspconfig'.solargraph.setup{}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
