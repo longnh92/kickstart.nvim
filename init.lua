@@ -74,6 +74,14 @@ require('lazy').setup({
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
+  -- fzf
+  {
+    'junegunn/fzf.vim',
+    dependencies = {
+      'junegunn/fzf',
+    }
+  },
+
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
   {
@@ -494,8 +502,8 @@ cmp.setup {
     end,
   },
   mapping = cmp.mapping.preset.insert {
-    ['<C-n>'] = cmp.mapping.select_next_item(),
-    ['<C-p>'] = cmp.mapping.select_prev_item(),
+    ['<C-k>'] = cmp.mapping.select_next_item(),
+    ['<C-j>'] = cmp.mapping.select_prev_item(),
     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete {},
@@ -532,3 +540,18 @@ require'lspconfig'.solargraph.setup{}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- config ctags
+vim.g.fzf_tags_command = 'ctags -R --exclude=.git --exclude=node_modules'
+vim.env.FZF_DEFAULT_COMMAND = 'ag --hidden --ignore .git --ignore node_modules -l -g ""'
+vim.o.tags='./tags;,tags'
+vim.keymap.set('n', '<leader>ufrt', function()
+  vim.fn.system({ 'ctags', '-R', '--languages=ruby', '--exclude=.git', '--exclude=log', '. $(bundle list --paths)'})
+end, { desc = 'Update Ruby + Gem tags' })
+
+vim.keymap.set('n', '<leader>urt', function()
+  vim.fn.system({ 'ctags', '-R', '--languages=ruby', '--exclude=.git', '--exclude=log', '.'})
+end, { desc = 'Update Ruby tags' })
+
+vim.keymap.set('n', '<leader>st', '<esc>:call fzf#vim#tags(expand("<cword>"))<cr>', { desc = '[S]earch [T]ags' })
+-- vim.keymap.set('n', '<leader>]', require('telescope.builtin').tags, { desc = 'Search tags' })
