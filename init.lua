@@ -234,6 +234,8 @@ vim.o.relativenumber = true
 
 -- Make line numbers default
 vim.wo.number = true
+vim.wo.wrap = true
+vim.wo.linebreak = true
 
 -- Enable mouse mode
 vim.o.mouse = 'a'
@@ -297,6 +299,11 @@ require('telescope').setup {
         ['<C-d>'] = false,
       },
     },
+  },
+  pickers = {
+    buffers = {
+      sort_lastused = true
+    }
   },
 }
 
