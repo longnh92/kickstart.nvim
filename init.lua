@@ -100,7 +100,9 @@ require('lazy').setup({
       'folke/neodev.nvim',
     },
   },
-
+  {
+    'jose-elias-alvarez/null-ls.nvim',
+  },
   {
     -- Autocompletion
     'hrsh7th/nvim-cmp',
@@ -115,6 +117,11 @@ require('lazy').setup({
       -- Adds a number of user-friendly snippets
       'rafamadriz/friendly-snippets',
     },
+  },
+  {
+    'windwp/nvim-autopairs',
+    event = "InsertEnter",
+    opts = {} -- this is equalent to setup({}) function
   },
 
   -- Useful plugin to show you pending keybinds.
@@ -169,7 +176,7 @@ require('lazy').setup({
     -- See `:help indent_blankline.txt`
     opts = {
       char = '┊',
-      show_trailing_blankline_indent = false,
+      show_trailing_blankline_indent = true,
     },
   },
 
@@ -205,6 +212,20 @@ require('lazy').setup({
     },
     build = ':TSUpdate',
   },
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({})
+    end,
+  },
+  {
+    "zbirenbaum/copilot-cmp",
+    config = function ()
+      require("copilot_cmp").setup()
+    end
+  }
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -474,6 +495,29 @@ local servers = {
 
 -- Setup neovim lua configuration
 require('neodev').setup()
+require'lspconfig'.solargraph.setup{
+  settings = {
+    solargraph = {
+      diagnostics = false,
+      completion = true,
+      formatting = false
+    }
+  }
+}
+local null_ls = require "null-ls"
+null_ls.setup {
+  debug = true,
+  debounce = 750,
+  sources = {
+    null_ls.builtins.diagnostics.eslint_d,
+    null_ls.builtins.diagnostics.rubocop,
+    null_ls.builtins.code_actions.eslint_d,
+    null_ls.builtins.formatting.stylua,
+    null_ls.builtins.formatting.rubyfmt,
+    null_ls.builtins.formatting.eslint_d,
+    null_ls.builtins.formatting.rubocop,
+  }
+}
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -501,18 +545,40 @@ mason_lspconfig.setup_handlers {
 -- See `:help cmp`
 local cmp = require 'cmp'
 local luasnip = require 'luasnip'
+local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+local npairs = require('nvim-autopairs')
+npairs.add_rules(require('nvim-autopairs.rules.endwise-ruby'))
+
 require('luasnip.loaders.from_vscode').lazy_load()
+require("luasnip").filetype_extend("ruby", { "rdoc" })
 luasnip.config.setup {}
 
+cmp.event:on(
+  "confirm_done",
+  cmp_autopairs.on_confirm_done({
+    sh = false,
+  })
+)
 cmp.setup {
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
     end,
+    enabled = function()
+      -- disable completion in comments
+      local context = require 'cmp.config.context'
+      -- keep command mode completion enabled when cursor is in a comment
+      if vim.api.nvim_get_mode().mode == 'c' then
+        return true
+      else
+        return not context.in_treesitter_capture("comment")
+          and not context.in_syntax_group("Comment")
+      end
+    end,
   },
   mapping = cmp.mapping.preset.insert {
-    ['<C-k>'] = cmp.mapping.select_next_item(),
-    ['<C-j>'] = cmp.mapping.select_prev_item(),
+    ['<C-j>'] = cmp.mapping.select_next_item(),
+    ['<C-k>'] = cmp.mapping.select_prev_item(),
     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete {},
@@ -540,12 +606,12 @@ cmp.setup {
     end, { 'i', 's' }),
   },
   sources = {
+    { name = "copilot" },
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
   },
 }
 
-require'lspconfig'.solargraph.setup{}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
@@ -568,6 +634,8 @@ vim.keymap.set('n', '<leader>st', '<esc>:call fzf#vim#tags(expand("<cword>"))<cr
 vim.keymap.set('n', '<leader>path', ':let @+=@%<CR>', { desc = 'Get current file path' })
 
 vim.keymap.set('n', '<leader>gb', '<cmd>Git blame<CR>', { desc = '[G]it [B]lame' })
-vim.keymap.set('n', '<leader>q', '<esc>:q<CR>', { desc = '[Q]uit the file' })
-vim.keymap.set('n', '<leader>Q', ':<esc>:wq<CR>', { desc = '[W]rite and [Q]uit the file' })
-vim.keymap.set('n', '<leader>W', ':<esc>:w<CR>', { desc = '[W]rite file' })
+vim.keymap.set('n', 'Q', ':<esc>:wq<CR>', { desc = '[W]rite and [Q]uit the file' })
+vim.keymap.set('n', 'W', ':<esc>:w<CR>', { desc = '[W]rite file' })
+-- vim.api.nvim_command('filetype on')
+-- vim.api.nvim_command('filetype indent on')
+vim.api.nvim_command('syntax on')
