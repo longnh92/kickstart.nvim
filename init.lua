@@ -72,7 +72,7 @@ require('lazy').setup({
   'tpope/vim-rhubarb',
 
   -- Detect tabstop and shiftwidth automatically
-  'tpope/vim-sleuth',
+  -- 'tpope/vim-sleuth',
 
   -- fzf
   {
@@ -100,9 +100,9 @@ require('lazy').setup({
       'folke/neodev.nvim',
     },
   },
-  {
-    'jose-elias-alvarez/null-ls.nvim',
-  },
+  -- {
+  --   'jose-elias-alvarez/null-ls.nvim',
+  -- },
   {
     -- Autocompletion
     'hrsh7th/nvim-cmp',
@@ -224,6 +224,16 @@ require('lazy').setup({
     "zbirenbaum/copilot-cmp",
     config = function ()
       require("copilot_cmp").setup()
+    end
+  },
+  {
+    "kylechui/nvim-surround",
+    version = "*", -- Use for stability; omit to use `main` branch for the latest features
+    event = "VeryLazy",
+    config = function()
+        require("nvim-surround").setup({
+            -- Configuration here, or leave empty to use defaults
+        })
     end
   }
 
@@ -361,7 +371,7 @@ require('nvim-treesitter.configs').setup {
   auto_install = true,
 
   highlight = { enable = true },
-  indent = { enable = true },
+  -- indent = { enable = true },
   incremental_selection = {
     enable = true,
     keymaps = {
@@ -498,26 +508,29 @@ require('neodev').setup()
 require'lspconfig'.solargraph.setup{
   settings = {
     solargraph = {
-      diagnostics = false,
+      diagnostics = true,
       completion = true,
       formatting = false
     }
   }
 }
-local null_ls = require "null-ls"
-null_ls.setup {
-  debug = true,
-  debounce = 750,
-  sources = {
-    null_ls.builtins.diagnostics.eslint_d,
-    null_ls.builtins.diagnostics.rubocop,
-    null_ls.builtins.code_actions.eslint_d,
-    null_ls.builtins.formatting.stylua,
-    null_ls.builtins.formatting.rubyfmt,
-    null_ls.builtins.formatting.eslint_d,
-    null_ls.builtins.formatting.rubocop,
-  }
-}
+
+-- require'lspconfig'.rubocop.setup{}
+-- local null_ls = require "null-ls"
+-- null_ls.setup {
+--   debug = true,
+--   debounce = 750,
+--   update_in_insert = false,
+--   sources = {
+--     null_ls.builtins.diagnostics.eslint_d,
+--     null_ls.builtins.diagnostics.rubocop,
+--     null_ls.builtins.code_actions.eslint_d,
+--     null_ls.builtins.formatting.stylua,
+--     null_ls.builtins.formatting.rubyfmt,
+--     null_ls.builtins.formatting.eslint_d,
+--     null_ls.builtins.formatting.rubocop,
+--   }
+-- }
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -555,9 +568,7 @@ luasnip.config.setup {}
 
 cmp.event:on(
   "confirm_done",
-  cmp_autopairs.on_confirm_done({
-    sh = false,
-  })
+  cmp_autopairs.on_confirm_done()
 )
 cmp.setup {
   snippet = {
@@ -581,6 +592,7 @@ cmp.setup {
     ['<C-k>'] = cmp.mapping.select_prev_item(),
     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<esc>'] = cmp.mapping.abort(),
     ['<C-Space>'] = cmp.mapping.complete {},
     ['<CR>'] = cmp.mapping.confirm {
       behavior = cmp.ConfirmBehavior.Replace,
